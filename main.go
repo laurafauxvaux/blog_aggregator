@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"os"
 
 	"github.com/laurafauxvaux/blog_aggregator/internal/config"
 )
@@ -10,17 +10,28 @@ import (
 func main() {
 	cfg, err := config.Read()
 	if err != nil {
-		log.Fatalf("failed to read initial config file: %v", err)
+		log.Fatalf("failed to read config file: %v", err)
 	}
 
-	if err := cfg.SetUser("laura"); err != nil {
-		log.Fatalf("failed to set new user: %v", err)
+	newState := state{
+		cfg: &cfg,
 	}
 
-	updatedCfg, err := config.Read()
-	if err != nil {
-		log.Fatalf("failed to read updated config file: %v", err)
+	cmds := commands{
+		names: make(map[string]func(*state, command) error),
 	}
 
-	fmt.Println(updatedCfg)
+	cmds.register("login", handlerLogin)
+
+	if len(os.Args) < 2 {
+		log.Fatalf("not enough arguments")
+	}
+	cmd := command{
+		name:      os.Args[1],
+		arguments: os.Args[2:],
+	}
+
+	if err := cmds.run(&newState, cmd); err != nil {
+		log.Fatalf("error: %v", err)
+	}
 }
