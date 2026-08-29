@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"os"
 
 	"github.com/laurafauxvaux/blog_aggregator/internal/config"
+	"github.com/laurafauxvaux/blog_aggregator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -13,7 +16,15 @@ func main() {
 		log.Fatalf("failed to read config file: %v", err)
 	}
 
+	db, err := sql.Open("postgres", cfg.DBURL)
+	if err != nil {
+		log.Fatalf("failed to open database: %v", err)
+	}
+
+	dbQueries := database.New(db)
+
 	newState := state{
+		db:  dbQueries,
 		cfg: &cfg,
 	}
 
@@ -22,6 +33,7 @@ func main() {
 	}
 
 	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
 
 	if len(os.Args) < 2 {
 		log.Fatalf("not enough arguments")
@@ -34,4 +46,5 @@ func main() {
 	if err := cmds.run(&newState, cmd); err != nil {
 		log.Fatalf("error: %v", err)
 	}
+
 }

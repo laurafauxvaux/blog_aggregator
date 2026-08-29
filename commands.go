@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/laurafauxvaux/blog_aggregator/internal/config"
+	"github.com/laurafauxvaux/blog_aggregator/internal/database"
 )
 
 type state struct {
+	db  *database.Queries
 	cfg *config.Config
 }
 
