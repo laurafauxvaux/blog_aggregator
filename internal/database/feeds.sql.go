@@ -13,7 +13,7 @@ import (
 )
 
 const createFeed = `-- name: CreateFeed :one
-INSERT INTO FEEDS(id, created_at, updated_at, name, url, user_id)
+INSERT INTO feeds(id, created_at, updated_at, name, url, user_id)
 VALUES (
     $1,
     $2,
@@ -52,6 +52,23 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 		&i.Url,
 		&i.UserID,
 	)
+	return i, err
+}
+
+const getFeedByURL = `-- name: GetFeedByURL :one
+SELECT feeds.name, feeds.id FROM feeds
+WHERE url = $1
+`
+
+type GetFeedByURLRow struct {
+	Name string
+	ID   uuid.UUID
+}
+
+func (q *Queries) GetFeedByURL(ctx context.Context, url string) (GetFeedByURLRow, error) {
+	row := q.db.QueryRowContext(ctx, getFeedByURL, url)
+	var i GetFeedByURLRow
+	err := row.Scan(&i.Name, &i.ID)
 	return i, err
 }
 
