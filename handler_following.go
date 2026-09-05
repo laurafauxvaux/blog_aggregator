@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
+
+	"github.com/laurafauxvaux/blog_aggregator/internal/database"
 )
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	if len(cmd.arguments) != 0 {
 		return fmt.Errorf("no argument required")
 	}
 
-	follows, err := s.db.GetFeedFollowsForUser(context.Background(), s.cfg.CurrentUserName)
+	follows, err := s.db.GetFeedFollowsForUser(context.Background(), user.Name)
 	if err != nil {
 		return err
 	}
@@ -21,5 +23,3 @@ func handlerFollowing(s *state, cmd command) error {
 
 	return nil
 }
-
-// GetFeedFollowsForUser(ctx context.Context, name string) ([]GetFeedFollowsForUserRow, error)
