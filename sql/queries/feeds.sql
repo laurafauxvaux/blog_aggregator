@@ -18,3 +18,16 @@ JOIN users ON FEEDS.user_id = users.id;
 -- name: GetFeedByURL :one
 SELECT feeds.name, feeds.id FROM feeds
 WHERE url = $1;
+
+
+-- name: MarkFeedFetched :exec
+UPDATE feeds
+SET last_fetched_at = NOW(),
+    updated_at = NOW()
+WHERE id = $1;
+
+
+-- name: GetNextFeedToFetch :one
+SELECT * FROM feeds
+ORDER BY last_fetched_at NULLS FIRST
+LIMIT 1;
